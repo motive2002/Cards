@@ -1,6 +1,8 @@
 import {Fragment} from 'react'
 
-const Score = (props) => {
+const Score = ({
+    text
+}) => {
     return (
 
         <Fragment>
@@ -21,7 +23,7 @@ const Score = (props) => {
             
             </style>
 
-            <h3>{props.text}</h3>
+            <h3>{text}</h3>
 
         </Fragment>
 

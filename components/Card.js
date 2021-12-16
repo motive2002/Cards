@@ -38,10 +38,16 @@ const Card = ({
            setHighlight(true) 
         }, tick2)
     }, [])
+
+    useEffect(() => {  //<--- set "winning" cards as clicked if a winner appears on first draw
+        if (turnCount === 1 && winningCard === true) {
+            handleClick()
+        }
+    }, [])
     
     const handleClick = (hardClick = false) => {
         
-        console.log("clicked")
+        
         //Check to see if it's the first turn using the turnCount prop.
         //Only on the first turn should the user be able to select which cards to hold
         if (turnCount === 1) {
@@ -49,35 +55,22 @@ const Card = ({
             clickStatus(index)     //run the func from the parent to get the clicked status from the child
         }
 
-        if (hardClick === true) {
-            if (winningCard === true) {
-                winningCard = false
-                setClicked(false)
-                clickStatus(index)
-                setHighlight(!highlight)
-                //setBorderColor()
-            }
-            console.log("HARD CLICK")
-        }
     }
 
     const setBorderColor = () => {
+
 
         if (highlight === true) {
 
             if (clicked === true && turnCount === 1) {
                 return yellow
-            }else if (winningCard === true) {
-                if(turnCount === 1) {
-                    setClicked(true)
-                    clickStatus(index)
-                }else{
-                return red
-                }
-            }else {
-                return green
             }
-        }else {
+            else if ( turnCount === 0 && winningCard === true) {
+                return red
+            }else{
+                 return green
+            }
+        }else{
             return green
         }
     }

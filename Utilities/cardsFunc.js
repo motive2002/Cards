@@ -104,8 +104,6 @@ const checkStraightsAndFlushes = (arrIn) => {
         buildString = buildString + item.val
 
     })
-    // buildString = fakeString
-    // isFlush = true
    
     if (series1.includes(buildString) === true) {
             straightType = 1
@@ -141,7 +139,7 @@ const checkDupes = (arrIn) => {
     const threeKind = false       //flag for three of a kind
     const fourKind = false        //flag for four of a kind
 
-    const fakeArray = [0, 0, 0, 0, 3, 0, 0, 2, 0, 0, 0, 0, 0, 0]
+    //const fakeArray = [0, 0, 0, 0, 3, 0, 0, 2, 0, 0, 0, 0, 0, 0] //for testing
 
     //make an array of 14 elements. 0 = nothing, 1-13 = card values
     for (let i = 0; i <14; i++) {
@@ -244,6 +242,8 @@ export const evalHand = (arrIn) => {
 
     if (score > 0) {
         return scoreText
+    }else{
+        return ""
     }
     
 }

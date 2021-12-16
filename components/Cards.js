@@ -2,7 +2,6 @@ import {Fragment, useEffect, useState, useRef} from 'react'
 import DrawButton from './DrawButton'
 import { defineDeck , shuffle, evalHand } from '../Utilities/cardsFunc';
 import Card from './Card'
-import Score from './Score';
 import { v4 as uuidv4 } from 'uuid'
 
 const CardsTemp = () => {
@@ -61,7 +60,7 @@ const CardsTemp = () => {
             setFoo(!foo)  //dummy for forced re-render
 
             evalHand(curHand.current)
-            //waitAndEvaluate()
+           
             
         }else if (turnCount.current === 2) {
 
@@ -82,6 +81,11 @@ const CardsTemp = () => {
             //We're holding those.
             curHand.current.forEach((item, index) => {
 
+                //strip the winning flag. Evaluate the rebuilt
+                //hand on it's own. Resolves a bug if a user 'unclicks' part
+                //of a winning hand on the first deal.
+                item.winningCard = false
+
                 if (item.clicked === false) {
        
                   //splice the un-clicked cards with new cards using the draw function.
@@ -95,29 +99,14 @@ const CardsTemp = () => {
             curHand.current = tempArr   //Replace our current hand with the rebuilt one.
 
             tempResult.current = evalHand(curHand.current)
-            //tempResult = waitAndEvaluate()
+            if (tempResult.current !== "") tempResult.current = `WINNER  ${tempResult.current}`
             setFoo(!foo)                //force re-render
             turnCount.current = 0       //reset turnCount
             cardsIndex.current = 0      //Move cardsIndex back to zero
             shuffle(fullDeck.current)   //Shuffle deck for new hand
 
-
-
-            
-
-           
-
         }
             
-    }
-
-    const waitAndEvaluate = () => {
-
-        setTimeout(() => {
-            setFoo(!foo)
-            return evalHand(curHand.current)
-        }, 500)
-
     }
 
     const hasClicked = (num) => {
@@ -215,9 +204,9 @@ const CardsTemp = () => {
 
         </div>
 
-        <DrawButton tick={buttonDisableTime.current} onClick={() => DrawClick()}/>
+        <DrawButton tick={buttonDisableTime.current} scoreText={tempResult.current} onClick={() => DrawClick()}/>
 
-        <Score text={tempResult.current} />
+        
         
     </Fragment>
 

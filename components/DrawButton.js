@@ -1,6 +1,11 @@
 import {useState, useEffect} from 'react';
+import Score from './Score';
 
-const DrawButton = (props) => {
+const DrawButton = ({
+    tick,
+    scoreText,
+    onClick
+}) => {
 
     const [disabled, setDisabled] = useState(false)
   
@@ -13,9 +18,9 @@ const DrawButton = (props) => {
 
         setTimeout(() => {
             setDisabled(false)
-        }, props.tick)
+        }, tick)
 
-    },[props.tick])
+    },[tick])
 
     return (
         <div>
@@ -40,8 +45,9 @@ const DrawButton = (props) => {
         `}</style>
 
            <button disabled={disabled} 
-           onClick={() => props.onClick()}
-           >Draw {props.tick}</button>
+           onClick={() => onClick()}
+           >Draw {tick}</button>
+           {disabled === true ? null: <Score text={scoreText} />}
 
         </div>
     );
