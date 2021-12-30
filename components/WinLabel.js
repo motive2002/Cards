@@ -1,11 +1,18 @@
 import {Fragment} from 'react'
+import useDisable from '../Utilities/useDisable';
 
-const Score = ({
-    text
+const WinLabel = ({
+    text,
+    tick
 }) => {
-    return (
 
-        <Fragment>
+
+    const disable = useDisable(tick)
+
+
+    return !disable ? (
+
+        <div>
 
             <style jsx> {`
             
@@ -24,10 +31,11 @@ const Score = ({
             </style>
 
             <h3>{text}</h3>
+            
 
-        </Fragment>
+        </div>
 
-    );
+    ) : null;
 };
 
-export default Score;
+export default WinLabel;

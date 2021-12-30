@@ -8,7 +8,6 @@ const THREE_OF_A_KIND = 3
 const TWO_PAIR = 2
 const JACKS_OR_BETTER = 1
 
-const whichTurn = 0
 
 export const defineDeck = () => {
 
@@ -155,7 +154,6 @@ const checkDupes = (arrIn) => {
     })
 
     
-    //console.log(fakeArray)
     xCards.forEach((item, index) => {
     //fakeArray.forEach((item, index) => {
 

@@ -1,8 +1,9 @@
 import {Fragment, useEffect, useState, useRef} from 'react'
-import DrawButton from './DrawButton'
 import { defineDeck , shuffle, evalHand } from '../Utilities/cardsFunc';
 import Card from './Card'
-import { v4 as uuidv4 } from 'uuid'
+import Button from './Button';
+import WinLabel from './WinLabel';
+import { stringify, v4 as uuidv4 } from 'uuid'
 
 const CardsTemp = () => {
 
@@ -135,6 +136,7 @@ const CardsTemp = () => {
 
     }
 
+    
     return (
 
     <Fragment >
@@ -142,12 +144,19 @@ const CardsTemp = () => {
         <style jsx>{`
 
             .grid-container {
-            display: grid;
-            
-            grid-gap: 16px 16px;
-            grid-template-columns: 96px 96px 96px 96px 96px;
-            background-color: #2196F3;
-            padding: 16px;
+                display: grid;
+                grid-gap: 16px 16px;
+                grid-template-columns: 96px 96px 96px 96px 96px;
+                background-color: #2196F3;
+                padding: 16px;
+            }
+
+            .grid-buttons {
+                display: grid;
+                grid-gap: 16px 16px;
+                grid-template-columns: 24px 24px 232px 100px 100px;
+                background-color: #2196F3;
+                padding: 16px;
             }
 
             .outer {
@@ -204,8 +213,18 @@ const CardsTemp = () => {
 
         </div>
 
-        <DrawButton tick={buttonDisableTime.current} scoreText={tempResult.current} onClick={() => DrawClick()}/>
-
+        <div className='outer'>
+        <div className='grid-buttons'>
+        <Button text={String.fromCharCode(8592)} width={40} tick={buttonDisableTime.current} onClick={() => alert('clicked')}/>
+        <Button text={String.fromCharCode(8594)} width={40} tick={buttonDisableTime.current} onClick={() => alert('clicked')}/>
+        <Button text="CREDITS" width={200} textSize={12} tick={buttonDisableTime.current} onClick={() => alert('clicked')}/>
+        <Button text="STAND" width={100} textSize={20} tick={buttonDisableTime.current} onClick={() => alert('clicked')}/>
+        <Button text="DRAW" width={100} textSize={20} tick={buttonDisableTime.current} onClick={() => DrawClick()}/>
+        
+        </div>
+        
+        </div>
+        <WinLabel tick={buttonDisableTime.current} text={tempResult.current}/>
         
         
     </Fragment>

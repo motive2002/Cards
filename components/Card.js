@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from "react";
+import useDelay from '../Utilities/useDelay' //custom hook for delay time
 
 const Card = ({
 
     //INCOMING PROPS
 
     index,       //for grid position and which card was clicked
-    tick,        //for timing
-    tick2,
+    tick,        //for cards appearing
+    tick2,       //for border highlight appearing after cards are all 'drawn'
     x, y,        //for coordinate on original sprite sheet
     turnCount,   //which turn are we on?
     winningCard,
@@ -17,27 +18,11 @@ const Card = ({
     const green = "#195c2d"
     const yellow  = "#f5f244"
     const blue = "#739dde"
-    const red = "#cc1104"
+    const red = "#faac11"
 
-    
-    
-    const [delay, setDelay] = useState(false);     //for conditional rendering on a delay
     const [clicked, setClicked] = useState(false)  //Clicked status of card.
-    const [highlight, setHighlight] = useState(false)
-
-
-    useEffect(() => {      //<---delay for loading cards
-        setTimeout(() => {
-        setDelay(true);
-    
-        }, tick);    
-    },[]);
-
-    useEffect(() => {   //<---delay for displaying border colors
-        setTimeout(() => {
-           setHighlight(true) 
-        }, tick2)
-    }, [])
+    const delay = useDelay(tick)
+    const highlight = useDelay(tick2)
 
     useEffect(() => {  //<--- set "winning" cards as clicked if a winner appears on first draw
         if (turnCount === 1 && winningCard === true) {
@@ -46,7 +31,6 @@ const Card = ({
     }, [])
     
     const handleClick = (hardClick = false) => {
-        
         
         //Check to see if it's the first turn using the turnCount prop.
         //Only on the first turn should the user be able to select which cards to hold
@@ -58,7 +42,6 @@ const Card = ({
     }
 
     const setBorderColor = () => {
-
 
         if (highlight === true) {
 
@@ -78,6 +61,7 @@ const Card = ({
     //Conditionally render based on the delay, so the cards are 'drawn' over a period of time.
     //If the cards are 'clicked' or if it's the first turn, style the borders appropriately.
     //Put the card in the proper column based on the index.
+    
     return !delay ? null : (
         <div onClick={() => handleClick(true)}>
         <style jsx>
