@@ -1,12 +1,13 @@
-const ROYAL_FLUSH = 250
-const STRAIGHT_FLUSH = 50
-const FOUR_OF_A_KIND = 25
-const FULL_HOUSE = 9
-const FLUSH = 6
-const STRAIGHT = 4
-const THREE_OF_A_KIND = 3
-const TWO_PAIR = 2
-const JACKS_OR_BETTER = 1
+
+const ROYAL_FLUSH = {text: "ROYAL FLUSH!", score: [250,500,750,1000,4000]}
+const STRAIGHT_FLUSH = {text: "STRAIGHT FLUSH!", score: [50,100,150,200,250]}
+const FOUR_OF_A_KIND = {text: "FOUR OF A KIND!", score: [25,50,75,100,125]}
+const FULL_HOUSE = {text: "FULL HOUSE!", score: [9,18,27,36,45]}
+const FLUSH = {text: "FLUSH!", score: [6,12,18,24,30]}
+const STRAIGHT = {text: "STRAIGHT", score: [4,8,12,16,20]}
+const THREE_OF_A_KIND = {text: "THREE OF A KIND!", score: [3,6,9,12,15]}
+const TWO_PAIR = {text: "TWO PAIR!", score: [2,4,6,8,10]}
+const JACKS_OR_BETTER = {text: "JACKS OR BETTER!", score: [1,2,3,4,5]}
 
 
 export const defineDeck = () => {
@@ -34,6 +35,7 @@ export const defineDeck = () => {
                 //define a 'clicked' property for each card to be used later
                 clicked: false,
                 winningCard: false,
+                
                 
             }
 
@@ -65,143 +67,198 @@ export const shuffle = (array) => {
     return array;
 }
 
+export const evaluateHand = (arrIn, turnCount) => {
 
+    const straightType = 0  //0 = none; 1= straight; 2= royal
 
-const checkStraightsAndFlushes = (arrIn) => {
+    const mySuit = null     //temp to hold a suit value
+    const tempArr = []      //temp to hold sorted cards
+    const pairCount = []    //for counting pairs
+    const highCount = 0     //for counting high cards
 
-    const sortedArr = [...arrIn]  //work with a copy. Don't sort the original
+    //flags for hand status
+    const isFlush = false 
+    const jackOrBetter = false    
+    const threeKind = false       
+    const fourKind = false        
+    const fullHouse = false
+    const twoPair = false
+    const lowPair = false
+    const potentialFlush = false
 
-    //string constant for runs. One normal, one for "royal"
-    const series1 = "12345678910111213"
-    const series2 = "110111213"
-    const buildString = ""
-    //const fakeString = "110111213" //for testing
-    const tempArr = []
-    const straightType = 0 //0 = none; 1= straight; 2= royal
-    const isFlush = false
+    //flag for valuing ace at either 1 or 14
+    const fourteen = false
 
-    //----check array for all the same suit (flush)
-    arrIn.forEach((item) => {
-        tempArr.push(item.suit)
-    })
-    
-    const check = (val) => {
-        return val === tempArr[0]
-    }
-   
-    isFlush =  tempArr.every(check)
-    //----
-
-    //--sort and check for straights
-    sortedArr.sort((a, b) => {
-        return a.val - b.val
-    })
-
-    sortedArr.forEach((item) => {
-
-        //concatenate string for testing later
-        buildString = buildString + item.val
-
-    })
-   
-    if (series1.includes(buildString) === true) {
-            straightType = 1
-        }else if (series2.includes(buildString) === true) {
-            straightType = 2
-        }else {
-            straightType = 0
-    }
-
-    if (straightType === 2 && isFlush === true) {
-        flagAll(arrIn)
-        return ROYAL_FLUSH
-    }else if(straightType === 1 && isFlush === true) {
-        flagAll(arrIn)
-        return STRAIGHT_FLUSH
-    }else if (straightType === 1 && isFlush === false) {
-        flagAll(arrIn)
-        return STRAIGHT
-    }else if (straightType === 0 && isFlush === true) {
-        flagAll(arrIn)
-        return FLUSH
-    }else {
-        return 0
-    }
-
-}
-
-const checkDupes = (arrIn) => {
-
-    const xCards = []             //for card counting
-    const pairCount = []          //if there's 2 pair, store unique values
-    const jackOrBetter = false    //flag for jacks or better
-    const threeKind = false       //flag for three of a kind
-    const fourKind = false        //flag for four of a kind
-
-    //const fakeArray = [0, 0, 0, 0, 3, 0, 0, 2, 0, 0, 0, 0, 0, 0] //for testing
-
-    //make an array of 14 elements. 0 = nothing, 1-13 = card values
-    for (let i = 0; i <14; i++) {
-        xCards.push(0)
-    }
+    //Arrays for counting instances of suits and card values
+    const flushMap = [0, 0, 0, 0] 
+    const cardVals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     arrIn.forEach((item) => {
 
-        //match the card value with the xCards index and add one for each
-        //card of that value counted
-        xCards[item.val] = xCards[item.val] + 1
-
+        flushMap[item.suit -1]++
+        cardVals[item.val]++
+        if(item.val > 9) highCount++
+        tempArr.push(item.val)
     })
 
-    
-    xCards.forEach((item, index) => {
-    //fakeArray.forEach((item, index) => {
+    //if there are 4 high cards and an ace, make the ace 14
+    if (highCount > 3 && cardVals[1] === 1) fourteen = true
 
-        //if the counted cards are 2 or more. Also check if there's just one pair if it's
-        //value is a jack or higher (or an ace), and set flags accordingly.
-        if (item === 2 && index >=11 || item === 2 && index === 1) {
-            jackOrBetter = true
-            flagCards(index, arrIn)
-        } 
+    //HANDLE FLUSHES------------------
+    isFlush = flushMap.includes(5)
 
-        //If there's 2 of a card, push it's value onto an array
-        if (item === 2) {
-             pairCount.push(index)
+    if (isFlush === true) flagAll(arrIn)
 
-             //if there's 2 pair, flag the cards for each unique value
-             if (pairCount.length > 1) {
-                 flagCards(pairCount[0], arrIn)
-                 flagCards(pairCount[1], arrIn)
-             }
+    if (turnCount === 1) {
+
+        //if there's a 4 in the suit map we have a potential flush
+        if (flushMap.includes(4) === true) {
+
+            potentialFlush = true
+
+            //find the suit index that has 4 in it's entry. +1 because suits are 1 based.
+            mySuit = flushMap.findIndex((el) => el === 4) + 1
+            
+            //set winning card to true for indexes containing that suit to hold those cards.
+            arrIn.forEach((item) => {
+                if (item.suit === mySuit) {
+                    item.winningCard = true
+                }
+            })
+            
         }
+    }
+
+    //HANDLE DUPES----------------------
+    cardVals.forEach((item, index) => {
+
         if (item === 3) {
             threeKind = true
-            flagCards(index, arrIn)
+            flagDupes(index, arrIn)
         }
         if (item === 4) {
             fourKind = true
-            flagCards(index, arrIn)
+            flagDupes(index, arrIn)
         } 
+        if (item === 2) {
+            pairCount.push(index)
+
+            if (pairCount.length > 1 && fourKind === false && threeKind === false) {
+                flagDupes(pairCount[0], arrIn)
+                flagDupes(pairCount[1], arrIn)
+                twoPair = true
+            }
+        }
+
+        if (pairCount.length === 1 && threeKind === true) {
+            fullHouse = true
+            flagAll(arrIn)
+        }
+
+        if (item === 2 && index >=11 || item === 2 && index === 1) {
+            if(potentialFlush === false){
+                if(threeKind === false && fourKind === false && fullHouse === false && twoPair === false){
+                    jackOrBetter = true
+                    flagDupes(index, arrIn)
+                }
+            }
+        }
+
+        if (turnCount === 1) {
+            if (item === 2 && index <11 && index > 1) {
+                if (potentialFlush === false) {
+                    if(threeKind === false && fourKind === false && fullHouse === false && twoPair === false){
+                        lowPair = true
+                        flagDupes(index, arrIn) 
+                    }
+                }
+            }
+        }
+
     })
 
-    if (pairCount.length === 1 && threeKind === true) {
-        flagAll(arrIn)
-        return FULL_HOUSE
-    }else if (pairCount.length === 2) {
-        return TWO_PAIR
-    }else if (threeKind === true && pairCount.length === 0) {
-        return THREE_OF_A_KIND
-    }else if (fourKind === true) {
-        return FOUR_OF_A_KIND
-    }else if (pairCount.length === 1 && threeKind === false && jackOrBetter === true) {
-        return JACKS_OR_BETTER
-    }else {
-        return 0
-    }
+        //HANDLE STRAIGHTS--------------------------
+        if(fourteen === true) {
+            let myAce = tempArr.findIndex((el) => el === 1)
+    
+            if(myAce !== -1) {
+               tempArr.splice(myAce, 1, 14)
+            }
+        }
+    
+        tempArr.sort((a, b) => a - b)
+        const arrLeft = tempArr.slice(0, -1)
+        const arrRight = tempArr.slice(1)
+    
+        if (isConsecutive(tempArr)) {
+            if (fourteen === true) {
+                straightType = 2
+                flagAll(arrIn)
+                console.log("ROYAL")
+            }else{
+                straightType = 1
+                flagAll(arrIn)
+        }
+    
+        }else if (isConsecutive(arrLeft) && turnCount === 1 && potentialFlush === false) {
+            if(lowPair === false && jackOrBetter === false) {
+                flagStraight(arrLeft, arrIn)
+            }
+    
+        }else if (isConsecutive(arrRight) && turnCount === 1 && potentialFlush === false) {
+            if(lowPair === false && jackOrBetter === false) {
+                myAce = arrRight.findIndex((el) => el === 14)
+                if(myAce !== -1) arrRight.splice(myAce, 1, 1)
+                flagStraight(arrRight, arrIn)
+            }
+        }
+    
+        if (fullHouse === true) {
+            return FULL_HOUSE
+        }else if (twoPair === true) {
+            return TWO_PAIR
+        }else if (threeKind === true && pairCount.length === 0) {
+            return THREE_OF_A_KIND
+        }else if (fourKind === true) {
+            return FOUR_OF_A_KIND
+        }else if (pairCount.length === 1 && threeKind === false && jackOrBetter === true) {
+            return JACKS_OR_BETTER
 
+        }else if (straightType === 2 && isFlush === true) {
+            return ROYAL_FLUSH
+        }else if(straightType === 1 && isFlush === true) {
+            return STRAIGHT_FLUSH
+        }else if (straightType === 1 && isFlush === false || straightType === 2 && isFlush === false) {
+            return STRAIGHT
+        }else if (straightType === 0 && isFlush === true) {
+            return FLUSH
+        }else {
+            return 0
+        }
+ 
 }
 
-const flagCards = (index, arrIn) => {
+const isConsecutive = (arr) => {
+
+    for(let i = arr[0], j = 0; j < arr.length; i++, j++){
+       if(arr[j] === i){
+          continue;
+       };
+       return false;
+    };
+    return true;
+ };
+
+ const flagStraight = (arrTemp, arrIn) => {
+
+    for (let i = 0; i < arrIn.length; i++) {
+        if (arrTemp.includes(arrIn[i].val)) {
+            arrIn[i].winningCard = true
+        }
+    }
+ }
+
+const flagDupes = (index, arrIn) => {
 
     //flag the cards responsible for the winning hand
     arrIn.forEach((item) => {
@@ -213,49 +270,9 @@ const flagCards = (index, arrIn) => {
 
 const flagAll = (arrIn) => {
 
-    //In the case of straights, flushes and full house, ALL cards
+    //In the case of complete straights, flushes and full house, ALL cards
     //in the hand are winning ones.
     arrIn.forEach((item) => {
         item.winningCard = true
     })
 }
-
-export const evalHand = (arrIn) => {
-
-    const scoreText = ""
-    
-    const score = Math.max(checkDupes(arrIn), checkStraightsAndFlushes(arrIn))
-    
-    switch (score) {
-        case ROYAL_FLUSH: scoreText = "ROYAL FLUSH!"; break
-        case STRAIGHT_FLUSH: scoreText = "STRAIGHT FLUSH!"; break
-        case FOUR_OF_A_KIND: scoreText = "4 OF A KIND!!"; break
-        case FULL_HOUSE: scoreText = "FULL HOUSE!"; break
-        case FLUSH: scoreText = "FLUSH!"; break
-        case STRAIGHT: scoreText = "STRAIGHT!"; break
-        case THREE_OF_A_KIND: scoreText = "3 OF A KIND!"; break
-        case TWO_PAIR: scoreText = "2 PAIR!"; break
-        case JACKS_OR_BETTER: scoreText = "JACKS OR BETTER!"; break
-    }
-
-    if (score > 0) {
-        return scoreText
-    }else{
-        return ""
-    }
-    
-}
-
-/* PAYOUT TABLE
-
-Royal Flush	    250	500	750	1000 4000
-Straight Flush	50	100	150	200	250
-Four of a Kind	25	50	75	100	125
-Full House	    9	18	27	36	45
-Flush	        6	12	18	24	30
-Straight	    4	8	12	16	20
-Three of a Kind	3	6	9	12	15
-Two Pair	    2	4	6	8	10
-Jacks or Better	1	2	3	4	5     
-
-*/

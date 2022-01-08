@@ -1,9 +1,14 @@
 import {Fragment, useEffect, useState, useRef} from 'react'
-import { defineDeck , shuffle, evalHand } from '../Utilities/cardsFunc';
+import { defineDeck , shuffle, evaluateHand } from '../Utilities/cardsFunc';
 import Card from './Card'
 import Button from './Button';
 import WinLabel from './WinLabel';
 import { stringify, v4 as uuidv4 } from 'uuid'
+
+import { FLUSH_ROYAL, FLUSH_STRAIGHT, FOUR_KIND, HOUSE_FULL, J_OR_BETTER, LOW_PAIR, PAIR_TWO, POT_FLUSH_AND_HIGH_PAIR, POT_SRAIGHT_HIGH_PAIR, 
+    POT_STRAIGHT, POT_STRAIGHT_AND_POT_FLUSH, POT_STRAIGHT_FLUSH, POT_STRAIGHT_NO_PAIR, POT_STRAIGHT_WITH_LOW_PAIR, 
+    STRAIGHT_NO_FLUSH, 
+    THREE_KIND} from '../Utilities/testHands';
 
 const CardsTemp = () => {
 
@@ -16,7 +21,7 @@ const CardsTemp = () => {
     const tick = useRef(0)                   //update card render delay (for 'animation')
     const buttonDisableTime = useRef(0)      //prop to disable the draw button for a period of time.
 
-    const tempResult = useRef('')
+    const tempResult = useRef()
 
     useEffect(() => {
         //shuffle the whole deck
@@ -54,13 +59,14 @@ const CardsTemp = () => {
 
             //FIRST TURN. Draw 5 fresh cards from a shuffled deck
             curHand.current = draw(5)
+            //curHand.current = STRAIGHT_NO_FLUSH
 
             //Set button disable time to one quarter second for each card (total 1250 ms)
             buttonDisableTime.current = 1250
 
             setFoo(!foo)  //dummy for forced re-render
 
-            evalHand(curHand.current)
+            evaluateHand(curHand.current, turnCount.current)
            
             
         }else if (turnCount.current === 2) {
@@ -98,9 +104,9 @@ const CardsTemp = () => {
             })
 
             curHand.current = tempArr   //Replace our current hand with the rebuilt one.
+            let myScore = evaluateHand(curHand.current, turnCount.current)
 
-            tempResult.current = evalHand(curHand.current)
-            if (tempResult.current !== "") tempResult.current = `WINNER  ${tempResult.current}`
+            if (myScore !== 0) tempResult.current = `WINNER  ${myScore.text}  ${myScore.score[0]} POINTS`
             setFoo(!foo)                //force re-render
             turnCount.current = 0       //reset turnCount
             cardsIndex.current = 0      //Move cardsIndex back to zero
