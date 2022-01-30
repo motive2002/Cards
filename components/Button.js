@@ -1,6 +1,6 @@
 
 //custom hook to set how long the button is disabled.
-import useDisable from '../Utilities/useDisable';  
+import useDelayedDisable from '../Utilities/useDelayedDisable';  
 
 const Button = ({
 
@@ -9,27 +9,26 @@ const Button = ({
     text,
     width,
     textSize,
-    onClick
-    
-}) => {
+    onClick,
+    isHardDisabled,
 
-    const disabled = useDisable(tick)
+}) => {
+    const delayedDisabled = useDelayedDisable(tick)
+    
+    const hasClicked = onClick
 
     return (
         <div>
         <style jsx>{`
             button {
                 display: block;
-                margin-left: auto;
                 margin-right: auto;
-                margin-top: 16px;
                 width: ${width}px;
                 height: 40px;
                 font-size: ${textSize}px;
                 font-weight: bolder;
                 background-color: rgb(92, 207, 211);
                 border-radius: 16px;
-                justify-content: center;
                 caret-color: transparent;
             }
             button: hover {
@@ -37,13 +36,12 @@ const Button = ({
                 }
         `}</style>
 
-           <button disabled={disabled} 
-           onClick={() => onClick()}
+           <button disabled={isHardDisabled ? true : delayedDisabled} 
+           onClick={hasClicked}
            >{text}</button>
 
         </div>
     );
 };
-
 
 export default Button;

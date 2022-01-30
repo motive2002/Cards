@@ -5,29 +5,31 @@ const Card = ({
 
     //INCOMING PROPS
 
-    index,       //for grid position and which card was clicked
-    tick,        //for cards appearing
-    tick2,       //for border highlight appearing after cards are all 'drawn'
-    x, y,        //for coordinate on original sprite sheet
-    turnCount,   //which turn are we on?
+    index,         //for grid position and which card was clicked
+    tickCard,      //for cards appearing
+    tickHighlight, //for border highlight appearing after cards are all 'drawn'
+    x, y,          //for coordinate on original sprite sheet
+    turnCount,     //which turn are we on?
     winningCard,
-    clickStatus  //Function call up to the parent for clicked status.
+    clickStatus    //Function call up to the parent for clicked status.
 
     }) => {
 
-    const green = "#195c2d"
-    const yellow  = "#f5f244"
-    const blue = "#739dde"
-    const red = "#faac11"
+    const GREEN = "#195c2d"
+    const YELLOW  = "#f5f244"
+    const BLUE = "#739dde"
+    const PINK = "#e99cba"
 
     const [clicked, setClicked] = useState(false)  //Clicked status of card.
-    const delay = useDelay(tick)
-    const highlight = useDelay(tick2)
+    const delay = useDelay(tickCard)
+    const highlight = useDelay(tickHighlight)
 
     useEffect(() => {  //<--- set "winning" cards as clicked if a winner appears on first draw
+        
         if (turnCount === 1 && winningCard === true) {
             handleClick()
         }
+
     }, [])
     
     const handleClick = (hardClick = false) => {
@@ -46,15 +48,15 @@ const Card = ({
         if (highlight === true) {
 
             if (clicked === true && turnCount === 1) {
-                return yellow
+                return YELLOW
             }
             else if ( turnCount === 0 && winningCard === true) {
-                return red
+                return PINK
             }else{
-                 return green
+                 return GREEN
             }
         }else{
-            return green
+            return GREEN
         }
     }
     
@@ -81,7 +83,7 @@ const Card = ({
             }
 
             div: hover {
-                border: 8px solid ${!clicked ? blue : yellow};
+                border: 8px solid ${!clicked ? BLUE : YELLOW};
             }
             `}
         </style>

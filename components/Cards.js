@@ -1,27 +1,30 @@
-import {Fragment, useEffect, useState, useRef} from 'react'
+import React, {Fragment, useEffect, useState, useRef} from 'react'
 import { defineDeck , shuffle, evaluateHand } from '../Utilities/cardsFunc';
 import Card from './Card'
-import Button from './Button';
 import WinLabel from './WinLabel';
+import InfoLabel from './InfoLabel';
+import HighScore from './HighScore';
 import { stringify, v4 as uuidv4 } from 'uuid'
+import Buttons from './Buttons';
+import { ScoreProvider } from './ScoreContext';
 
-import { FLUSH_ROYAL, FLUSH_STRAIGHT, FOUR_KIND, HOUSE_FULL, J_OR_BETTER, LOW_PAIR, PAIR_TWO, POT_FLUSH_AND_HIGH_PAIR, POT_SRAIGHT_HIGH_PAIR, 
-    POT_STRAIGHT, POT_STRAIGHT_AND_POT_FLUSH, POT_STRAIGHT_FLUSH, POT_STRAIGHT_NO_PAIR, POT_STRAIGHT_WITH_LOW_PAIR, 
-    STRAIGHT_NO_FLUSH, 
-    THREE_KIND} from '../Utilities/testHands';
+const Cards = () => {
 
-const CardsTemp = () => {
+    //The big Cards component. This renders an array of the Card component, and deals
+    //with the DrawClick.. dealing cards from the deck and calling functions to evaluate
+    //the hand. A lot of useRef() variables for values I wanted to persist between renders
+    //WITHOUT causing a rerender. Only one useState variable is used, and that's for forced
+    //rerender of the main component.... which by default renders all the individual Card 
+    //components (children) with a delay set up for each card.
 
-  
-    const [foo, setFoo] = useState(false)    //force re-render
+    const [foo, setFoo] = useState(false)    //forced re-render on draw click
     const turnCount = useRef(0)              //2 turns to draw    
     const cardsIndex = useRef(0)             //index for which card in array to be rendered
     const curHand = useRef([])               //current hand of cards      
     const fullDeck = useRef(defineDeck())    //the whole deck of 52 cards
     const tick = useRef(0)                   //update card render delay (for 'animation')
     const buttonDisableTime = useRef(0)      //prop to disable the draw button for a period of time.
-
-    const tempResult = useRef()
+    const handResult = useRef({})            //for winLabel component. Result of the hand. Will update Context.
 
     useEffect(() => {
         //shuffle the whole deck
@@ -53,19 +56,20 @@ const CardsTemp = () => {
 
         tick.current = 0       //reset timing tick for each draw
         turnCount.current++    //advance turnCount
-        tempResult.current = ""
+        handResult.current = ""
     
         if (turnCount.current === 1) {
 
             //FIRST TURN. Draw 5 fresh cards from a shuffled deck
             curHand.current = draw(5)
-            //curHand.current = STRAIGHT_NO_FLUSH
+            //REPLACE curHand.current here with a hand imported from testHands.js for testing
 
             //Set button disable time to one quarter second for each card (total 1250 ms)
             buttonDisableTime.current = 1250
 
-            setFoo(!foo)  //dummy for forced re-render
+            setFoo(!foo)  //dummy for forced re-render.
 
+            //Evaluate hand and see if we should recommend some 'hold' cards
             evaluateHand(curHand.current, turnCount.current)
            
             
@@ -77,7 +81,7 @@ const CardsTemp = () => {
             //Temp array for rebuilding the hand
             let tempArr = curHand.current
 
-            //If no cards are "held", disable time will still be set at 1250.
+            //If no cards are "held", disable time will still be set at 1250ms.
             //NO change to disable time for button prop will keep it from firing
             //the useEffect in the button component, so change it to a different, but close value.
             if (buttonDisableTime.current === 1250) {
@@ -97,16 +101,13 @@ const CardsTemp = () => {
        
                   //splice the un-clicked cards with new cards using the draw function.
                   //draw returns an array, but it will only have one item in this case, so get item 0
-                  tempArr.splice(index, 1, draw(1)[0])  
-
-                    
+                  tempArr.splice(index, 1, draw(1)[0])    
                 }
             })
 
             curHand.current = tempArr   //Replace our current hand with the rebuilt one.
-            let myScore = evaluateHand(curHand.current, turnCount.current)
+            handResult.current =  evaluateHand(curHand.current, turnCount.current)
 
-            if (myScore !== 0) tempResult.current = `WINNER  ${myScore.text}  ${myScore.score[0]} POINTS`
             setFoo(!foo)                //force re-render
             turnCount.current = 0       //reset turnCount
             cardsIndex.current = 0      //Move cardsIndex back to zero
@@ -130,7 +131,7 @@ const CardsTemp = () => {
 
         //For each card clicked, add a quarter second for button disable time.
         //This will change the default of 1250 ms (for full 5 card re-draw), and disable
-        //the button for an appropriate amount of time based on how many cards need to be re-drawn.
+        //the buttons for an appropriate amount of time based on how many cards need to be re-drawn.
         curHand.current.forEach((item) => {
             if (item.clicked === false) {
                 n +=250
@@ -153,28 +154,31 @@ const CardsTemp = () => {
                 display: grid;
                 grid-gap: 16px 16px;
                 grid-template-columns: 96px 96px 96px 96px 96px;
+                grid-auto-rows: 168px;
                 background-color: #2196F3;
+                width: 576px;
                 padding: 16px;
+                
             }
 
-            .grid-buttons {
-                display: grid;
-                grid-gap: 16px 16px;
-                grid-template-columns: 24px 24px 232px 100px 100px;
-                background-color: #2196F3;
-                padding: 16px;
-            }
-
-            .outer {
+            .cards-outer {
                 display: flex;
                 justify-content: center;
+                height: 168px;
+            }
+
+            .winLabel {
+                display: flex;
+                width: 576px;
+                margin: auto;
+                background-color: burlywood;
             }
 
             `}
 
         </style>
 
-        <div className='outer'>
+        <div className='cards-outer'>
         
             <div className='grid-container'>
 
@@ -196,16 +200,19 @@ const CardsTemp = () => {
                         
                         return (
                     
-                    <Card key={uuidv4()}          //I need to replace this, but for now just make sure the keys are totally unique.
+                    <Card key={uuidv4()}          //Make sure the keys are totally unique.
                         index={index}             //Index for click callback and which spot on grid for card to render.
                         x={item.position[0]}      //position in x on main image to start render
                         y={item.position[1]}      //position in y on main image to start render
-                        tick={n}                  //amount of time to wait before card renders
-                        tick2={buttonDisableTime.current}
+                        tickCard={n}              //amount of time to wait before card renders
+
+                        //amount of time to wait until card is highlighted
+                        tickHighlight={buttonDisableTime.current}
 
                         //Let the Card component know which turn we're on for setting clicked status and border styling.
                         turnCount={turnCount.current}
-
+                        
+                        //is it a 'winning' or 'hold' card?
                         winningCard={item.winningCard}
 
                         //bounce our hasClicked function down to the card component to handle a click later.
@@ -219,23 +226,27 @@ const CardsTemp = () => {
 
         </div>
 
-        <div className='outer'>
-        <div className='grid-buttons'>
-        <Button text={String.fromCharCode(8592)} width={40} tick={buttonDisableTime.current} onClick={() => alert('clicked')}/>
-        <Button text={String.fromCharCode(8594)} width={40} tick={buttonDisableTime.current} onClick={() => alert('clicked')}/>
-        <Button text="CREDITS" width={200} textSize={12} tick={buttonDisableTime.current} onClick={() => alert('clicked')}/>
-        <Button text="STAND" width={100} textSize={20} tick={buttonDisableTime.current} onClick={() => alert('clicked')}/>
-        <Button text="DRAW" width={100} textSize={20} tick={buttonDisableTime.current} onClick={() => DrawClick()}/>
-        
-        </div>
-        
-        </div>
-        <WinLabel tick={buttonDisableTime.current} text={tempResult.current}/>
-        
+        {/* Just says multiplier and bet. does nothing else */}
+        <InfoLabel />
+
+        {/* Context wrapper for updating score and bet multiplier */}
+        <ScoreProvider>
+        {/* Buttons with disable time and click handler. The point is to diasble the buttons
+        while the cards are being drawn, and to prevent changing the bet in the middle of the hand */}
+        <Buttons tick={buttonDisableTime.current} turnCount={turnCount.current} sendDrawClick={DrawClick}/>
+
+        {/* Win label with delay time. Wait to display a win after the cards are all drawn (no spoiling it! haha) 
+        Will also update the score in Context*/}
+        <WinLabel tick={buttonDisableTime.current} winDisplay={handResult.current}/>
+
+        {/* High score label, updated from Context */}
+        <HighScore />
+
+        </ScoreProvider>
         
     </Fragment>
 
     );
 };
 
-export default CardsTemp;
+export default Cards;

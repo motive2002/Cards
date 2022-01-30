@@ -1,3 +1,5 @@
+//PREMADE HANDS FOR TESTING PURPOSES
+
 const cardW = 80  //width of card in pixels
 const cardH = 120 //height of card in pixels
 
@@ -614,6 +616,82 @@ export const STRAIGHT_NO_FLUSH = [
         val: 10,
         suit: 2,
         position: [9 * cardW, 1 * cardH],
+        clicked: false,
+        winningCard: false
+    },
+]
+
+export const POT_STRAIGHT_LOW_ACE = [
+    {
+        val: 1, //JACK
+        suit: 2, //HEARTS
+        position: [0 * cardW, 1 * cardH],
+        clicked: false,
+        winningCard: false
+    },
+    {
+        val: 2,
+        suit: 1,
+        position: [1 * cardW, 0 * cardH],
+        clicked: false,
+        winningCard: false
+    },
+    {
+        val: 3,
+        suit: 3,
+        position: [2 * cardW, 2 * cardH],
+        clicked: false,
+        winningCard: false
+    },
+    {
+        val: 4,
+        suit: 2,
+        position: [3 * cardW, 1 * cardH],
+        clicked: false,
+        winningCard: false
+    },
+    {
+        val: 7,
+        suit: 4,
+        position: [6 * cardW, 3 * cardH],
+        clicked: false,
+        winningCard: false
+    },
+]
+
+export const POT_STRAIGHT_HIGH_ACE = [
+    {
+        val: 11, //JACK
+        suit: 2, //HEARTS
+        position: [10 * cardW, 1 * cardH],
+        clicked: false,
+        winningCard: false
+    },
+    {
+        val: 12,
+        suit: 1,
+        position: [11 * cardW, 0 * cardH],
+        clicked: false,
+        winningCard: false
+    },
+    {
+        val: 13,
+        suit: 2,
+        position: [12 * cardW, 1 * cardH],
+        clicked: false,
+        winningCard: false
+    },
+    {
+        val: 1,
+        suit: 3,
+        position: [0 * cardW, 2 * cardH],
+        clicked: false,
+        winningCard: false
+    },
+    {
+        val: 9,
+        suit: 2,
+        position: [8 * cardW, 1 * cardH],
         clicked: false,
         winningCard: false
     },

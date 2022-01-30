@@ -1,16 +1,25 @@
-
-import styles from '../styles/Home.module.css'
+import Head from 'next/head'
+import {useState} from 'react'
 import Cards from '../components/Cards'
+import LoadMeFirst from '../components/LoadMeFirst'
 
 export default function Home() {
 
+  //state for callback. When the LoadMeFirst component is finished
+  //with local storage, the callback is invoked.
+  const [ready, setReady] = useState(false)
+
   return (
 
-    <div>
+  <div className="container">
+  <Head>
+    <title>Video Poker</title>
+    <link rel="icon" href="public/favicon.ico" />
+  </Head>
+  <LoadMeFirst isReady={() => setReady(true)} />
+  {!ready ? null: <Cards />}
 
-      <h1 className={styles.title}>Video Poker</h1>
-      <Cards/>
-
-    </div>
+  </div>
   )
+
 }
